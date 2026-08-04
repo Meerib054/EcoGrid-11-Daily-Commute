@@ -9,7 +9,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if "best_carbon" not in st.session_state:
-    st.session_state.best_carbon = float("inf")
+    try:
+        with open("highscore.txt", "r") as f:
+            st.session_state.best_carbon = float(f.read())
+    except:
+        st.session_state.best_carbon = float("inf")
 
 if "stage" not in st.session_state:
     st.session_state.stage = 0
@@ -272,6 +276,8 @@ else:
 
     if st.session_state.carbon < st.session_state.best_carbon:
         st.session_state.best_carbon = st.session_state.carbon
+        with open("highscore.txt", "w") as f:
+            f.write(str(st.session_state.best_carbon))
         st.toast("🎉 New Personal Best Score Saved!", icon="🏆")
     
 
