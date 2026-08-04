@@ -60,7 +60,7 @@ scenarios = [
         "image": "coffee.gif",
         "choices": [
             {"text": "Grab a single-use plastic cup from the drive-thru window", "carbon": 7, "time": 3, "cost": 8, "is_eco": False},
-            {"text": "Wait in a queue to fill your personal mug (get a $2 discount!)", "carbon": 1, "time": 15, "cost": 4, "is_eco": True}
+            {"text": "Wait in a queue to fill your personal mug (get a \$2 discount)", "carbon": 1, "time": 15, "cost": 4, "is_eco": True}
         ]
     },
     {
@@ -77,7 +77,7 @@ scenarios = [
         "image": "trash.gif",
         "choices": [
             {"text": "Dump all mixed waste into an overflowing street trash bin", "carbon": 11, "time": 1, "cost": 0, "is_eco": False},
-            {"text": "Pack all packaging in your bag to sort at home (earn $5 recycling reward later)", "carbon": 0, "time": 6, "cost": -5, "is_eco": True}
+            {"text": "Pack all packaging in your bag to sort at home (earn \$5 recycling reward later)", "carbon": 0, "time": 6, "cost": -5, "is_eco": True}
         ]
     },
     {
@@ -192,11 +192,11 @@ with dash_col2:
 
 with dash_col3:
     if st.session_state.money > 30:
-        st.success(f"💵 Budget: ${st.session_state.money}")
+        st.success(f"💵 Budget: \${st.session_state.money}")
     elif st.session_state.money > 0:
-        st.warning(f"⚠️ Budget: ${st.session_state.money}")
+        st.warning(f"⚠️ Budget: \${st.session_state.money}")
     else:
-        st.error(f"💸 Budget: ${st.session_state.money}")
+        st.error(f"💸 Budget: \${st.session_state.money}")
 
 st.write("---")
 
