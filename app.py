@@ -1,5 +1,12 @@
 import streamlit as st
 
+st.set_page_config(page_title="EcoGrid: SDG 11 Challenge", layout="centered")
+st.markdown("""
+<style>
+    .stApp { background-color: #2b090a; }
+    [data-testid="stSidebar"] {background-color: #4a1014; border-right: 2px solid #6b1418; }
+</style>
+""", unsafe_allow_html=True)
 
 if "best_carbon" not in st.session_state:
     st.session_state.best_carbon = float("inf")
@@ -9,135 +16,136 @@ if "stage" not in st.session_state:
     st.session_state.carbon = 0
     st.session_state.time = 0
     st.session_state.streak = 0
+    st.session_state.money = 100
     st.session_state.mall_visited = False
 
 scenarios = [
     {
-        "story": "7:00 AM — MORNING HEAT: It's already sweltering outside. You need to cool your room while getting ready, but you're short on time.",
+        "story": "7:00 AM — MORNING HEAT: It's sweltering outside. You need to cool your room while getting ready.",
         "image": "getting-ready.gif",
         "choices": [
-            {"text": "Blast the central AC at 18°C with doors wide open to cool down instantly", "carbon": 14, "time": 1, "is_eco": False},
-            {"text": "Turn on a low-energy ceiling fan and open high windows for air flow", "carbon": 1, "time": 8, "is_eco": True},
-            {"text": "Leave the window AC unit running on eco-mode while you take a long shower", "carbon": 8, "time": 3, "is_eco": False}
+            {"text": "Blast central AC at 18°C with doors wide open", "carbon": 14, "time": 1, "cost": 15, "is_eco": False},
+            {"text": "Turn on a low-energy ceiling fan and open high windows", "carbon": 1, "time": 8, "cost": 2, "is_eco": True},
+            {"text": "Leave window AC unit running on eco-mode while taking a shower", "carbon": 8, "time": 3, "cost": 8, "is_eco": False}
         ]
     },
     {
         "story": "7:30 AM — WATER HYGIENE: You need to brush your teeth and wash up before heading out.",
         "image": "brushing.gif",
         "choices": [
-            {"text": "Let hot water run continuously so it stays warm for rinsing", "carbon": 6, "time": 2, "is_eco": False},
-            {"text": "Use cold water in a small mug and turn off the tap completely between rinses", "carbon": 0, "time": 7, "is_eco": True}
+            {"text": "Let hot water run continuously for easy rinsing", "carbon": 6, "time": 2, "cost": 10, "is_eco": False},
+            {"text": "Use cold water in a mug and turn off the tap completely", "carbon": 0, "time": 7, "cost": 0, "is_eco": True}
         ]
     },
     {
-        "story": "8:00 AM — THE MORNING COMMUTE: Heavy rain hits suddenly. You are running 10 minutes late for your presentation!",
+        "story": "8:00 AM — THE MORNING COMMUTE: Heavy rain hits! You are running 10 minutes late.",
         "image": "rain.gif",
         "choices": [
-            {"text": "Order an express private gas taxi to drop you directly at the door", "carbon": 18, "time": 12, "is_eco": False},
-            {"text": "Slightly risk being late: Walk 10 mins in rain gear to catch the high-speed electric metro", "carbon": 2, "time": 30, "is_eco": True},
-            {"text": "Take a shared diesel commuter van that skips metro lines", "carbon": 10, "time": 20, "is_eco": False}
+            {"text": "Order an express private gas taxi to drop you at the door", "carbon": 18, "time": 12, "cost": 30, "is_eco": False},
+            {"text": "Walk 10 mins in rain gear to catch the high-speed electric metro", "carbon": 2, "time": 30, "cost": 5, "is_eco": True},
+            {"text": "Take a shared diesel commuter van", "carbon": 10, "time": 20, "cost": 12, "is_eco": False}
         ]
     },
     {
-        "story": "8:30 AM — GRIDLOCK EMBARGO: Highway 4 is completely locked. Drivers are idling everywhere.",
+        "story": "8:30 AM — GRIDLOCK EMBARGO: Highway 4 is locked. Drivers are idling everywhere.",
         "image": "highway-lock.gif",
         "choices": [
-            {"text": "Pay extra toll for a single-occupant express bypass highway line", "carbon": 15, "time": 10, "is_eco": False},
-            {"text": "Abandon vehicle travel: Switch to a city rental kick-scooter in the rain", "carbon": 1, "time": 22, "is_eco": True},
-            {"text": "Wait it out idling in your vehicle while blasting the radio", "carbon": 12, "time": 35, "is_eco": False}
+            {"text": "Pay extra toll for a single-occupant express bypass highway line", "carbon": 15, "time": 10, "cost": 25, "is_eco": False},
+            {"text": "Switch to a city rental kick-scooter in the bike lane", "carbon": 1, "time": 22, "cost": 4, "is_eco": True},
+            {"text": "Wait it out idling in your vehicle while blasting the radio", "carbon": 12, "time": 35, "cost": 8, "is_eco": False}
         ]
     },
     {
         "story": "10:30 AM — MORNING COFFEE: You need a quick caffeine boost before your meeting.",
         "image": "coffee.gif",
         "choices": [
-            {"text": "Grab a single-use plastic cup with a plastic straw from the drive-thru window", "carbon": 7, "time": 3, "is_eco": False},
-            {"text": "Wait in a long 15-minute queue to get poured into your personal thermal mug", "carbon": 1, "time": 15, "is_eco": True}
+            {"text": "Grab a single-use plastic cup from the drive-thru window", "carbon": 7, "time": 3, "cost": 8, "is_eco": False},
+            {"text": "Wait in a queue to fill your personal mug (get a $2 discount!)", "carbon": 1, "time": 15, "cost": 4, "is_eco": True}
         ]
     },
     {
-        "story": "12:30 PM — LUNCHTIME RUSH: You have 30 minutes before your next shift. Options are limited.",
+        "story": "12:30 PM — LUNCHTIME RUSH: You have 30 minutes before your next shift.",
         "image": "lunch.gif",
         "choices": [
-            {"text": "Order high-speed motorbike delivery (heavy plastic wrap & imported red meat burger)", "carbon": 16, "time": 8, "is_eco": False},
-            {"text": "Walk 12 minutes to a local organic farm-to-table cooperative with ceramic plates", "carbon": 1, "time": 28, "is_eco": True},
-            {"text": "Grab a pre-packaged convenience store meal containing single-use utensils", "carbon": 8, "time": 10, "is_eco": False}
+            {"text": "Order high-speed motorbike delivery (heavy plastic wrap & imported meat)", "carbon": 16, "time": 8, "cost": 22, "is_eco": False},
+            {"text": "Walk 12 minutes to a local organic farm-to-table coop", "carbon": 1, "time": 28, "cost": 10, "is_eco": True},
+            {"text": "Grab a pre-packaged convenience store meal", "carbon": 8, "time": 10, "cost": 14, "is_eco": False}
         ]
     },
     {
-        "story": "1:30 PM — WASTE MANAGEMENT: You finished your meal. The public sorting bins nearby are broken and locked.",
+        "story": "1:30 PM — WASTE MANAGEMENT: You finished lunch. Public sorting bins are broken.",
         "image": "trash.gif",
         "choices": [
-            {"text": "Dump all mixed waste into a single overflowing street trash bin", "carbon": 11, "time": 1, "is_eco": False},
-            {"text": "Pack all greasy packaging and cans in your bag to sort at home later", "carbon": 0, "time": 6, "is_eco": True}
+            {"text": "Dump all mixed waste into an overflowing street trash bin", "carbon": 11, "time": 1, "cost": 0, "is_eco": False},
+            {"text": "Pack all packaging in your bag to sort at home (earn $5 recycling reward later)", "carbon": 0, "time": 6, "cost": -5, "is_eco": True}
         ]
     },
     {
-        "story": "3:00 PM — PRINTING DEMANDS: You need to hand out notes to 5 colleagues for a brainstorm session.",
+        "story": "3:00 PM — PRINTING DEMANDS: You need to hand out notes to 5 colleagues for a brainstorm.",
         "image": "nb.gif",
         "choices": [
-            {"text": "Print full-color single-sided thick glossy pages on fresh paper", "carbon": 9, "time": 2, "is_eco": False},
-            {"text": "Spend 10 minutes setting up a shared cloud link and projection display instead", "carbon": 0, "time": 10, "is_eco": True}
+            {"text": "Print full-color single-sided thick glossy pages", "carbon": 9, "time": 2, "cost": 12, "is_eco": False},
+            {"text": "Spend 10 minutes setting up a shared cloud link and projector", "carbon": 0, "time": 10, "cost": 0, "is_eco": True}
         ]
     },
     {
-        "story": "4:30 PM — CLIMATE CONTROL DISPUTE: The study lounge is freezing, but someone left the window open with the AC blasting.",
+        "story": "4:30 PM — CLIMATE CONTROL DISPUTE: Study lounge is freezing, window left open with AC blasting.",
         "image": "ac.gif",
         "choices": [
-            {"text": "Ignore it—facility management will shut down building power tonight anyway", "carbon": 13, "time": 1, "is_eco": False},
-            {"text": "Take 5 minutes to adjust thermostat presets, shut window seals, and notify staff", "carbon": 0, "time": 6, "is_eco": True}
+            {"text": "Ignore it—facility management will shut down power tonight anyway", "carbon": 13, "time": 1, "cost": 0, "is_eco": False},
+            {"text": "Take 5 minutes to adjust thermostat presets and notify staff (Eco-rebate)", "carbon": 0, "time": 6, "cost": -10, "is_eco": True}
         ]
     },
     {
-        "story": "5:30 PM — SHOPPING & SUPPLIES: You need to pick up a few household groceries before going home.",
+        "story": "5:30 PM — SHOPPING & SUPPLIES: Pick up household groceries before heading home.",
         "image": "grocery.gif",
         "choices": [
-            {"text": "Buy air-freighted imported berries wrapped in double plastic containers", "carbon": 12, "time": 5, "is_eco": False},
-            {"text": "Walk 15 minutes out of your way to buy locally grown open-basket seasonal produce", "carbon": 1, "time": 20, "is_eco": True}
+            {"text": "Buy air-freighted imported berries in double plastic containers", "carbon": 12, "time": 5, "cost": 18, "is_eco": False},
+            {"text": "Walk 15 minutes out of your way for locally grown seasonal produce", "carbon": 1, "time": 20, "cost": 7, "is_eco": True}
         ]
     },
     {
-        "story": "6:30 PM — FREE TIME CHOICE: You meet your friends. Everyone is deciding where to hang out.",
+        "story": "6:30 PM — FREE TIME CHOICE: Meeting friends. Everyone is deciding where to hang out.",
         "image": "hang-out.gif",
         "choices": [
-            {"text": "Go to the commercial mega-mall with high air-conditioning emissions", "carbon": 14, "time": 15, "is_eco": False},
-            {"text": "Head to the community eco-park with free public green spaces", "carbon": 0, "time": 25, "is_eco": True},
-            {"text": "Go home and run multiple high-power gaming rigs on separate rooms", "carbon": 8, "time": 10, "is_eco": False}
+            {"text": "Go to the commercial mega-mall with high air-conditioning emissions", "carbon": 14, "time": 15, "cost": 25, "is_eco": False},
+            {"text": "Head to the community eco-park with free public green spaces", "carbon": 0, "time": 25, "cost": 0, "is_eco": True},
+            {"text": "Go home and run multiple high-power gaming rigs in separate rooms", "carbon": 8, "time": 10, "cost": 10, "is_eco": False}
         ]
     },
     {
-        "story": "8:00 PM — EVENING LAUNDRY: Your outfit for tomorrow's competition needs to be cleaned.",
+        "story": "8:00 PM — EVENING LAUNDRY: Your outfit for tomorrow needs to be cleaned.",
         "image": "laundry.gif",
         "choices": [
-            {"text": "Run a small half-load on express thermal hot water and tumble dry on high heat", "carbon": 16, "time": 30, "is_eco": False},
-            {"text": "Combine with family laundry, run cold eco-wash, and hang dry overnight", "carbon": 1, "time": 65, "is_eco": True}
+            {"text": "Run a half-load on express hot water and tumble dry on high heat", "carbon": 16, "time": 30, "cost": 15, "is_eco": False},
+            {"text": "Combine with family laundry, run cold eco-wash, and hang dry overnight", "carbon": 1, "time": 65, "cost": 2, "is_eco": True}
         ]
     },
     {
-        "story": "9:30 PM — RESIDENTIAL ENERGY: Your family is watching TV in the living room while room lights are on in empty rooms.",
+        "story": "9:30 PM — RESIDENTIAL ENERGY: TV is on while lights run in empty rooms.",
         "image": "lights.gif",
         "choices": [
-            {"text": "Leave all lights and standby devices plugged in around the home", "carbon": 10, "time": 1, "is_eco": False},
-            {"text": "Walk through the house turning off unused lighting and switching off power strips", "carbon": 0, "time": 8, "is_eco": True}
+            {"text": "Leave all lights and standby devices plugged in around the home", "carbon": 10, "time": 1, "cost": 12, "is_eco": False},
+            {"text": "Walk through the house turning off unused lighting and power strips", "carbon": 0, "time": 8, "cost": 0, "is_eco": True}
         ]
     },
     {
-        "story": "10:30 PM — NIGHTTIME TECH CHARGING: Your tablet, phone, and power bank all need charging overnight.",
+        "story": "10:30 PM — NIGHTTIME TECH CHARGING: Tablet, phone, and power bank all need charging.",
         "image": "charging.gif",
         "choices": [
-            {"text": "Plug all 3 devices into fast-charging bricks left in sockets all night long", "carbon": 7, "time": 1, "is_eco": False},
-            {"text": "Plug them into an eco-smart smart strip with automated 2-hour safety shut-off timers", "carbon": 0, "time": 5, "is_eco": True}
+            {"text": "Plug all 3 devices into fast-charging bricks left in sockets all night", "carbon": 7, "time": 1, "cost": 6, "is_eco": False},
+            {"text": "Plug into an eco-smart strip with automated shut-off timers", "carbon": 0, "time": 5, "is_eco": True, "cost": 1}
         ]
     },
     {
-        "story": "11:00 PM — SLEEP CLIMATE: Settling into bed. How are you setting up your room temperature for the 8-hour sleep?",
+        "story": "11:00 PM — SLEEP CLIMATE: Setting up room temperature for 8 hours of sleep.",
         "image": "sleep.gif",
         "choices": [
-            {"text": "Set AC to freezing 16°C and sleep under heavy thick blankets", "carbon": 18, "time": 1, "is_eco": False},
-            {"text": "Set AC to optimal 24°C combined with sleep-timer mode and ceiling fan", "carbon": 2, "time": 3, "is_eco": True}
+            {"text": "Set AC to freezing 16°C and sleep under heavy thick blankets", "carbon": 18, "time": 1, "cost": 20, "is_eco": False},
+            {"text": "Set AC to optimal 24°C combined with sleep-timer mode and ceiling fan", "carbon": 2, "time": 3, "cost": 4, "is_eco": True}
         ]
     }
-]
+]    
 
 with st.sidebar:
     st.header("🌍 About SDG 11")
@@ -163,7 +171,7 @@ with st.sidebar:
     st.title("Green Commuter Challenge 🚶‍♂️🚌")
 
 st.write("### 🏙️ City Status Live Dashboard")
-dash_col1, dash_col2 = st.columns(2)
+dash_col1, dash_col2, dash_col3= st.columns(3)
 
 
 with dash_col1:
@@ -181,9 +189,31 @@ with dash_col2:
         st.warning("🟡 Gridlock Level: MODERATE")
     else:
         st.error("🔴 Gridlock Level: HIGH TRAFFIC")
+
+with dash_col3:
+    if st.session_state.money > 30:
+        st.success(f"💵 Budget: ${st.session_state.money}")
+    elif st.session_state.money > 0:
+        st.warning(f"⚠️ Budget: ${st.session_state.money}")
+    else:
+        st.error(f"💸 Budget: ${st.session_state.money}")
+
 st.write("---")
 
-if st.session_state.stage<len(scenarios):
+if st.session_state.money <=0:
+    st.error("💸 BANKRUPT! You ran out of money and could not complete your day's journey.")
+    st.write("Living sustainably often saves money in the long run. High-convenience options quickly drained your funds!")
+
+    if st.button("Try Again"):
+        st.session_state.stage = 0
+        st.session_state.carbon = 0
+        st.session_state.time = 0
+        st.session_state.money = 100
+        st.session_state.streak = 0
+        st.session_state.mall_visited = False
+        st.rerun()
+
+elif st.session_state.stage<len(scenarios):
     current=scenarios[st.session_state.stage]
 
     st.subheader(f"Stage {st.session_state.stage + 1} of {len(scenarios)}")
@@ -199,12 +229,16 @@ if st.session_state.stage<len(scenarios):
     st.write("")
 
     for choice in current["choices"]:
-        if st.button(choice["text"]):
+        cost_text = f" Earns +${abs(choice['cost'])}" if choice['cost'] < 0 else (f" Costs ${choice['cost']}" if choice['cost'] > 0 else " Free")
+        button_label = f"{choice['text']} [{cost_text}]"
+
+        if st.button(button_label):
             if "mega-mall" in choice["text"]:
                 st.session_state.mall_visited=True
 
             st.session_state.carbon += choice["carbon"]
             st.session_state.time += choice["time"]
+            st.session_state.money -= choice["cost"]
 
             #the positive sound thing
             if choice["is_eco"]:
@@ -226,11 +260,13 @@ if st.session_state.stage<len(scenarios):
 else:
     st.success("You've completed the challenge!")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.metric(label="Total Carbon Footprint (kg CO₂)", value=st.session_state.carbon)
     with col2:
         st.metric(label="Total Travel Time (minutes)", value=st.session_state.time)
+    with col3:
+        st.metric(label="Remaining Money", value=f"${st.session_state.money}")
     
     st.write("---")
 
@@ -278,5 +314,6 @@ else:
         st.session_state.carbon = 0
         st.session_state.time = 0
         st.session_state.streak = 0
+        st.session_state.money = 100
         st.session_state.mall_visited = False
         st.rerun()
