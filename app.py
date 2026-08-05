@@ -1,5 +1,10 @@
 import streamlit as st
 
+
+st.cache_data.clear()
+st.cache_resource.clear()
+
+
 st.set_page_config(page_title="EcoGrid: SDG 11 Challenge", layout="centered")
 st.markdown("""
 <style>
