@@ -238,7 +238,7 @@ elif st.session_state.stage<len(scenarios):
     st.write("")
 
     for choice in current["choices"]:
-        cost_text = f" Earns +${abs(choice['cost'])}" if choice['cost'] < 0 else (f" Costs ${choice['cost']}" if choice['cost'] > 0 else " Free")
+        cost_text = f" Earns +AED{abs(choice['cost'])}" if choice['cost'] < 0 else (f" Costs AED{choice['cost']}" if choice['cost'] > 0 else " Free")
         button_label = f"{choice['text']} [{cost_text}]"
 
         if st.button(button_label):
