@@ -253,7 +253,7 @@ elif st.session_state.stage<len(scenarios):
             if choice["is_eco"]:
                 st.audio("https://www.soundjay.com/buttons/sounds/button-09a.mp3", autoplay=True)
                 st.session_state.streak+=1
-                if st.session_state.streak >=3:
+                if st.session_state.streak >=5:
                     st.toast("⚡ Multiplier Active: Eco Champion! Bonus -2 Carbon!", icon="🌿")
                     st.session_state.carbon = max(0, st.session_state.carbon - 2)
 
