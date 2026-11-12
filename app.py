@@ -1,5 +1,6 @@
 import streamlit as st
 from pathlib import Path
+import base64
 
 st.cache_data.clear()
 st.cache_resource.clear()
@@ -228,15 +229,17 @@ elif st.session_state.stage<len(scenarios):
     st.subheader(f"Stage {st.session_state.stage + 1} of {len(scenarios)}")
 
     if "image" in current:
-        if "image" in current:
-    
-            base = Path(__file__).parent
-            matches = list(base.rglob(current["image"]))
-            if matches:
-                st.image(str(matches[0]), use_container_width=True)
-            else:
-                st.warning(f"Can't find {current['image']}")
-                st.write("Files the app can see:", [p.name for p in base.rglob("*.gif")])
+        matches = list(Path(__file__).parent.rglob(current["image"]))
+        if matches:
+            data = matches[0].read_bytes()
+            st.caption(f"{matches[0].name}: {len(data)} bytes, starts with {data[:6]}")
+            b64 = base64.b64encode(data).decode()
+            st.markdown(
+                f'<img src="data:image/gif;base64,{b64}" style="width:100%">',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.warning(f"Can't find {current['image']}")
 
     st.write(current["story"])
     
