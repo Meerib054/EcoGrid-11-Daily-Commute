@@ -229,7 +229,7 @@ elif st.session_state.stage<len(scenarios):
 
     if "image" in current:
         if "image" in current:
-        from pathlib import Path
+    
             base = Path(__file__).parent
             matches = list(base.rglob(current["image"]))
             if matches:
