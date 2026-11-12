@@ -228,7 +228,15 @@ elif st.session_state.stage<len(scenarios):
     st.subheader(f"Stage {st.session_state.stage + 1} of {len(scenarios)}")
 
     if "image" in current:
-        st.image(current["image"], use_container_width=True)
+        if "image" in current:
+        from pathlib import Path
+            base = Path(__file__).parent
+            matches = list(base.rglob(current["image"]))
+            if matches:
+                st.image(str(matches[0]), use_container_width=True)
+            else:
+                st.warning(f"Can't find {current['image']}")
+                st.write("Files the app can see:", [p.name for p in base.rglob("*.gif")])
 
     st.write(current["story"])
     
